@@ -49,7 +49,7 @@ const lessRegex = /\.(less)$/
 const lessModuleRegex = /\.module\.(less)$/
 
 // common function to get style loaders
-const getStyleLoaders = (cssOptions, preProcessor) => {
+const getStyleLoaders = (cssOptions, preProcessor, lessOptions) => {
   const loaders = [
     {
       loader: MiniCssExtractPlugin.loader,
@@ -82,12 +82,16 @@ const getStyleLoaders = (cssOptions, preProcessor) => {
     }
   ]
   if (preProcessor) {
-    loaders.push({
-      loader: require.resolve(preProcessor),
-      options: {
-        sourceMap: shouldUseSourceMap
-      }
-    })
+    if (lessOptions) {
+      loaders.push(
+        {
+          loader: require.resolve(preProcessor),
+          options: lessOptions
+        }
+      )
+    } else {
+      loaders.push(require.resolve(preProcessor))
+    }
   }
   return loaders
 }
@@ -286,6 +290,13 @@ module.exports = {
                       }
                     }
                   }
+                ],
+                [
+                  require.resolve('babel-plugin-import'),// 导入 import 插件
+                  {
+                    libraryName: 'antd',   //暴露antd
+                    style: 'css'
+                  }
                 ]
               ],
               cacheDirectory: true,
@@ -330,8 +341,7 @@ module.exports = {
               {
                 importLoaders: 1,
                 sourceMap: shouldUseSourceMap
-              },
-              'less-loader'
+              }
             ),
             // Don't consider CSS imports dead code even if the
             // containing package claims to have no side effects.
@@ -349,8 +359,7 @@ module.exports = {
                 sourceMap: shouldUseSourceMap,
                 modules: true,
                 getLocalIdent: getCSSModuleLocalIdent
-              },
-              'less-loader'
+              }
             )
           },
           // Opt-in support for SASS. The logic here is somewhat similar
@@ -396,7 +405,10 @@ module.exports = {
                 importLoaders: 2,
                 sourceMap: shouldUseSourceMap
               },
-              'less-loader'
+              'less-loader',
+              {
+                javascriptEnabled: true
+              }
             ),
             // Don't consider CSS imports dead code even if the
             // containing package claims to have no side effects.
@@ -415,7 +427,10 @@ module.exports = {
                 modules: true,
                 getLocalIdent: getCSSModuleLocalIdent
               },
-              'less-loader'
+              'less-loader',
+              {
+                javascriptEnabled: true
+              }
             )
           },
           // "file" loader makes sure assets end up in the `build` folder.

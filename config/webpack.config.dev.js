@@ -31,7 +31,7 @@ const lessRegex = /\.(less)$/
 const lessModuleRegex = /\.module\.(less)$/
 
 // common function to get style loaders
-const getStyleLoaders = (cssOptions, preProcessor) => {
+const getStyleLoaders = (cssOptions, preProcessor, lessOptions) => {
   const loaders = [
     require.resolve('style-loader'),
     {
@@ -60,7 +60,16 @@ const getStyleLoaders = (cssOptions, preProcessor) => {
     }
   ]
   if (preProcessor) {
-    loaders.push(require.resolve(preProcessor))
+    if (lessOptions) {
+      loaders.push(
+        {
+          loader: require.resolve(preProcessor),
+          options: lessOptions
+        }
+      )
+    } else {
+      loaders.push(require.resolve(preProcessor))
+    }
   }
   return loaders
 }
@@ -217,6 +226,13 @@ module.exports = {
                       }
                     }
                   }
+                ],
+                [
+                  require.resolve('babel-plugin-import'),// 导入 import 插件
+                  {
+                    libraryName: 'antd',   //暴露antd
+                    style: 'css'
+                  }
                 ]
               ],
               // This is a feature of `babel-loader` for webpack (not Babel itself).
@@ -263,8 +279,7 @@ module.exports = {
             use: getStyleLoaders(
               {
                 importLoaders: 1
-              },
-              'less-loader'
+              }
             )
           },
           // Adds support for CSS Modules (https://github.com/css-modules/css-modules)
@@ -276,8 +291,7 @@ module.exports = {
                 importLoaders: 1,
                 modules: true,
                 getLocalIdent: getCSSModuleLocalIdent
-              },
-              'less-loader'
+              }
             )
           },
           // Opt-in support for SASS (using .scss or .sass extensions).
@@ -306,7 +320,9 @@ module.exports = {
           {
             test: lessRegex,
             exclude: lessModuleRegex,
-            use: getStyleLoaders({ importLoaders: 2 }, 'less-loader')
+            use: getStyleLoaders({ importLoaders: 2 }, 'less-loader', {
+              javascriptEnabled: true
+            })
           },
           // Adds support for CSS Modules, but using less
           // using the extension .module.scss or .module.less
@@ -318,7 +334,10 @@ module.exports = {
                 modules: true,
                 getLocalIdent: getCSSModuleLocalIdent
               },
-              'less-loader'
+              'less-loader',
+              {
+                javascriptEnabled: true
+              }
             )
           },
           // "file" loader makes sure those assets get served by WebpackDevServer.
