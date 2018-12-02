@@ -1,33 +1,49 @@
-import React, { Component } from 'react'
-import TweenOne from 'rc-tween-one'
-import { withRouter, BrowserRouter, StaticRouter, Route, Switch } from 'react-router-dom'
-
-import PropTypes from 'prop-types'
-import { Provider } from 'mobx-react'
-import QueueAnim from 'rc-queue-anim'
+import React from 'react'
+import { Router, Switch } from 'react-router-dom'
+import { Provider, observer } from 'mobx-react'
 import DevTool from 'mobx-react-devtools'
+import { Spin } from 'antd'
 
-import { DefaultLayout, HomeLayout } from '../views/layout'
-import Me from '../pages/me'
-import Home from '../pages/home'
+import { DefaultLayout, BasicLayout } from '../views/layout'
+import NotFound from '../views/common/404'
+import Routers from './routers'
+import createBrowserHistory from '../utils/browserHistory'
+import loaderStore from '../stores/loader'
 
 const isDev = process.env.NODE_ENV === 'development'
 
-// @withRouter
-export default class Root extends Component {
+// BrowserRouter 不暴露 history 参数，因全局ajax拦截需要用到 history, 故使用 Router 组件
+@observer
+class Root extends React.Component {
   render() {
-    const location = this.props.location
+    const { context, location } = this.props
     return (
       <div>
         {isDev && <DevTool />}
-        <Provider>
-          <Switch location={location}>
-            <HomeLayout exact path="/" component={Home} />
-            <DefaultLayout name="home" exact path="/" component={Home} />
-            <DefaultLayout name="me" path="/me" component={Me} />
-          </Switch>
+        <Provider loaderStore={this.props.loaderStore || loaderStore}>
+          <Router context={context} location={location} history={createBrowserHistory}>
+            <Switch>
+              {Routers.map((x, i) => {
+                return x.layout === 'basic' ? (
+                  <BasicLayout key={i} name={x.name} exact path={x.path} component={x.component} />
+                ) : (
+                  <DefaultLayout
+                    key={i}
+                    name={x.name}
+                    exact
+                    path={x.path}
+                    component={x.component}
+                  />
+                )
+              })}
+              <DefaultLayout component={NotFound} />
+            </Switch>
+          </Router>
         </Provider>
+        {loaderStore.isLoading && <Spin className="comm-loader" tip="Loading..." />}
       </div>
     )
   }
 }
+
+export default Root
