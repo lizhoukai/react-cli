@@ -1,8 +1,32 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import QueueAnim from 'rc-queue-anim'
+import { Button, Spin } from 'antd'
+import { observer, inject } from 'mobx-react'
 
+@inject('loaderStore')
+@observer
 class Home extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      items: '',
+      curPage: 1
+    }
+  }
+
+  componentWillMount() {
+    // console.log(React.Component.prototype)
+    this.getData()
+  }
+
+  async getData() {
+    const res = await this.$http.get('/t/product/?limit=6')
+    if (res && res.code === 0) {
+      this.setState({ items: res.page })
+    }
+  }
+
   render() {
     return (
       <div>
@@ -10,9 +34,8 @@ class Home extends React.Component {
           <Link to="/">首页</Link>
           <Link to="/me">我的</Link>
         </div>
-        <QueueAnim type={['right', 'left']} delay={300} key="text" className="layout-content">
-          home page
-        </QueueAnim>
+
+        <Button type="primary">Button</Button>
       </div>
     )
   }
