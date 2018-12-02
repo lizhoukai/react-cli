@@ -1,8 +1,7 @@
 import React from 'react'
-
 import { Route } from 'react-router-dom'
 
-export const DefaultLayout = ({ component: Component, ...rest }) => {
+export const BasicLayout = ({ component: Component, ...rest }) => {
   return (
     <Route
       {...rest}
@@ -15,6 +14,6 @@ export const DefaultLayout = ({ component: Component, ...rest }) => {
   )
 }
 
-export const HomeLayout = ({ component: Component, ...rest }) => {
+export const DefaultLayout = ({ component: Component, ...rest }) => {
   return <Route {...rest} render={matchProps => <Component {...matchProps} />} />
 }
