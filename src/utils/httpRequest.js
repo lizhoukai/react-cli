@@ -2,10 +2,13 @@
  * @Author: Leon
  * @Date: 2017-08-20 00:16:20
  * @Last Modified by: Leon
- * @Last Modified time: 2018-05-20 19:00:17
+ * @Last Modified time: 2018-12-01 20:25:08
  */
 
 import axios from 'axios'
+import { message } from 'antd'
+import history from '../utils/browserHistory'
+import loaderStore from '../stores/loader'
 
 axios.defaults.baseURL = '/api'
 axios.create({
@@ -24,9 +27,11 @@ axios.interceptors.request.use(
     if (localStorage.hasOwnProperty('token')) {
       config.headers['token'] = localStorage.getItem('token')
     }
+    loaderStore.handleToggle()
     return config
   },
   error => {
+    loaderStore.handleToggle()
     return Promise.reject(error)
   }
 )
@@ -34,32 +39,39 @@ axios.interceptors.request.use(
 /**
  * 响应拦截
  */
+
 axios.interceptors.response.use(
   response => {
+    loaderStore.handleToggle()
     return response
   },
   error => {
     if (error && error.response) {
       switch (error.response.status) {
-        case 400:
-          alert('请求的参数不正确，或缺少必要信息!')
-          break
         case 401:
-          alert('需要用户认证的接口用户信息不正确!')
-          break
-        case 403:
-          alert('缺少对应功能的权限!')
+          message.error('当前用户未授权，请重新登录!')
+          history.push('/login')
           break
         case 404:
-          alert('数据不存在，或未开放!')
+          message.error('404 请求错误,未找到该资源!')
           break
-        case 500:
-          alert('服务器异常!')
+        case 502:
+          message.error('502 网络错误!')
+          break
+        case 503:
+          message.error('503 服务不可用!')
+          break
+        case 504:
+          message.error('504 网络超时!')
+          break
+        case 505:
+          message.error('505 http版本不支持该请求!')
           break
       }
     } else {
-      alert('连接到服务器失败')
+      message.error('连接到服务器失败')
     }
+    loaderStore.handleToggle()
     return Promise.reject(error)
   }
 )
@@ -68,7 +80,7 @@ let HTTP = (type, url, params, config = {}) => {
   let args = [url, params, config].filter(x => Boolean(x))
   return axios[type](...args).then(res => {
     if (res.data && res.status !== 200) {
-      alert(res.data.msg)
+      message.error(res.data.msg)
     }
     return res.data
   })
