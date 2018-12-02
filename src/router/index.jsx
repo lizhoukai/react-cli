@@ -18,7 +18,7 @@ class Root extends React.Component {
   render() {
     const { context, location } = this.props
     return (
-      <div>
+      <div className="root-inner">
         {isDev && <DevTool />}
         <Provider loaderStore={this.props.loaderStore || loaderStore}>
           <Router context={context} location={location} history={createBrowserHistory}>

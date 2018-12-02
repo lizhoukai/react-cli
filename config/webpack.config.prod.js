@@ -71,6 +71,12 @@ const getStyleLoaders = (cssOptions, preProcessor, lessOptions) => {
         plugins: () => [
           require('postcss-flexbugs-fixes'),
           require('postcss-preset-env')({
+            browsers: [
+              '>1%',
+              'last 4 versions',
+              'Firefox ESR',
+              'not ie < 9', // React doesn't support IE8 anyway
+            ],
             autoprefixer: {
               flexbox: 'no-2009'
             },
@@ -275,7 +281,6 @@ module.exports = {
           {
             test: /\.(js|mjs|jsx)$/,
             include: paths.appSrc,
-
             loader: require.resolve('babel-loader'),
             options: {
               customize: require.resolve('babel-preset-react-app/webpack-overrides'),
