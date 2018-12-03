@@ -1,0 +1,13 @@
+@import './reset.scss';
+@import './theme.scss';
+
+body {
+  font-family: Microsoft YaHei, STHeiti, Helvetica, Arial, sans-serif;
+}
+
+body,
+html,
+#root,
+.root-inner {
+  height: 100%;
+}

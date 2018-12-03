@@ -3,7 +3,7 @@ import React from 'react'
 import { render } from 'react-dom'
 import Root from './router'
 
-import './assets/style/orc.less'
+import './assets/style/orc.scss'
 import http from './utils/httpRequest'
 import dayjs from 'dayjs'
 
